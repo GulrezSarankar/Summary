@@ -1,0 +1,28 @@
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #e5e7eb;
+    z-index: 999;
+  }
+  
+  .mobile-item {
+    color: #111;
+    font-size: 26px;
+  }
+  
+  .mobile-item.active {
+    color: #4f46e5;
+  }
+  
+  @media (min-width: 900px) {
+    .mobile-nav {
+      display: none;
+    }
+  }
+  
