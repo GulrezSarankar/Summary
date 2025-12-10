@@ -5,7 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^5.15.14",
+    "@mui/icons-material": "^6.0.0",
     "@mui/material": "^6.5.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
@@ -15,10 +15,9 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.1",
     "react": "^19.0.0",
-    "react-app-rewired": "^2.2.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.9.4",
-    "react-scripts": "5.0.1",
+    "react-scripts": "^5.0.1",
     "three": "^0.181.2",
     "web-vitals": "^2.1.4"
   },
@@ -44,12 +43,6 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
-    ],
-    "scripts": {
-  "start": "react-app-rewired start",
-  "build": "react-app-rewired build",
-  "test": "react-app-rewired test"
-}
-
+    ]
   }
 }

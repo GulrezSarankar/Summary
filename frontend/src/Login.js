@@ -1,112 +1,126 @@
-import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Grid, Card, CardContent } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function Auth({ isRegister }) {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
+export default function Auth({ isRegister }) {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const endpoint = isRegister ? 'register' : 'login';
-            const payload = isRegister ? { username, email, password } : { email, password };
-            const response = await axios.post(`http://localhost:5000/${endpoint}`, payload);
-    
-            if (!isRegister) {
-                const token = response.data.access_token;
-                localStorage.setItem('token', token);  // Save token in localStorage
-                navigate('/dashboard');
-            } else {
-                alert('Registration successful!');
-                navigate('/login');
-            }
-        } catch (err) {
-            setError('Error during authentication. Please try again.');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const endpoint = isRegister ? "register" : "login";
+      const payload = isRegister
+        ? { username, email, password }
+        : { email, password };
+
+      const res = await axios.post(`http://localhost:5000/${endpoint}`, payload);
+
+      if (!isRegister) {
+        localStorage.setItem("token", res.data.access_token);
+        navigate("/dashboard");
+      } else {
+        alert("Registration Successful!");
+        navigate("/login");
+      }
+    } catch {
+      setError("Something went wrong. Try again.");
+    }
+  };
+
+  return (
+    <div className="relative flex items-center justify-center w-full h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+
+      {/* Soft floating background shapes */}
+      <div className="absolute w-72 h-72 bg-white/50 backdrop-blur-xl rounded-full top-10 left-10 blur-2xl opacity-60 animate-pulse"></div>
+      <div className="absolute w-80 h-80 bg-white/40 backdrop-blur-xl rounded-full bottom-10 right-10 blur-2xl opacity-60 animate-pulse"></div>
+
+      {/* Main Card */}
+      <div className="relative w-full max-w-md p-8 bg-white/70 backdrop-blur-2xl shadow-xl rounded-3xl border border-white/50 animate-fadeUp">
+
+        <h2 className="text-3xl font-bold text-center text-gray-800">
+          {isRegister ? "Create Account" : "Welcome Back"}
+        </h2>
+
+        <p className="text-center text-gray-600 mt-1 mb-4">
+          {isRegister ? "Join our community" : "Log in to continue"}
+        </p>
+
+        {error && (
+          <p className="text-red-500 text-center mb-2 font-medium">{error}</p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {isRegister && (
+            <input
+              type="text"
+              placeholder="Username"
+              required
+              className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-400 outline-none"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          )}
+
+          <input
+            type="email"
+            placeholder="Email Address"
+            required
+            className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-400 outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-400 outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button
+            type="submit"
+            className="w-full py-3 bg-blue-500 text-white font-semibold rounded-xl shadow-md hover:bg-blue-600 transition-all"
+          >
+            {isRegister ? "Sign Up" : "Log In"}
+          </button>
+        </form>
+
+        {/* Switch Page */}
+        <button
+          onClick={() => navigate(isRegister ? "/login" : "/register")}
+          className="w-full mt-4 text-blue-600 font-medium hover:underline"
+        >
+          {isRegister
+            ? "Already have an account? Log In"
+            : "Don't have an account? Sign Up"}
+        </button>
+
+        {/* Home Button */}
+        <button
+          onClick={() => navigate("/")}
+          className="w-full mt-2 py-2 text-gray-700 font-medium border border-gray-300 rounded-xl hover:bg-gray-100 transition"
+        >
+          Go to Home
+        </button>
+      </div>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-    };
-
-    return (
-        <Container component="main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f5f7fa, #c3cfe2)', height: '100vh', position: 'relative' }}>
-            {/* Glassy background with blur effect */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    backdropFilter: 'blur(10px)',
-                    zIndex: -1
-                }}
-            ></div>
-
-            {/* Card */}
-            <Card sx={{ padding: 4, boxShadow: 10, width: '100%', maxWidth: 400, backdropFilter: 'blur(15px)', backgroundColor: 'rgba(255, 255, 255, 0.6)', borderRadius: 3 }}>
-                <CardContent>
-                    <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>
-                        {isRegister ? 'Create Account' : 'Welcome Back'}
-                    </Typography>
-                    {error && <Typography color="error" align="center">{error}</Typography>}
-                    <form onSubmit={handleSubmit}>
-                        {isRegister && (
-                            <TextField 
-                                label="Username" 
-                                fullWidth 
-                                margin="normal" 
-                                value={username} 
-                                onChange={(e) => setUsername(e.target.value)} 
-                                required 
-                                sx={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 1 }} 
-                            />
-                        )}
-                        <TextField 
-                            label="Email Address" 
-                            fullWidth 
-                            margin="normal" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)} 
-                            required 
-                            sx={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 1 }} 
-                        />
-                        <TextField 
-                            label="Password" 
-                            type="password" 
-                            fullWidth 
-                            margin="normal" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)} 
-                            required 
-                            sx={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: 1 }} 
-                        />
-                        <Button 
-                            type="submit" 
-                            fullWidth 
-                            variant="contained" 
-                            color="primary" 
-                            sx={{ marginTop: 2, fontWeight: 'bold', textTransform: 'none', padding: '12px', background: 'linear-gradient(135deg, #4facfe, #00f2fe)' }}>
-                            {isRegister ? 'Sign Up' : 'Log In'}
-                        </Button>
-                    </form>
-                    <Grid container justifyContent="center" sx={{ marginTop: 2 }}>
-                        <Grid item>
-                            <Button 
-                                variant="text" 
-                                onClick={() => navigate(isRegister ? '/login' : '/register')} 
-                                sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                                {isRegister ? 'Already have an account? Log In' : "Don't have an account? Sign Up"}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </CardContent>
-            </Card>
-        </Container>
-    );
+        .animate-fadeUp {
+          animation: fadeUp 0.6s ease-out;
+        }
+      `}</style>
+    </div>
+  );
 }
-
-export default Auth;
