@@ -60,7 +60,6 @@ const About = () => {
           <h2 className="text-4xl font-bold text-gray-900 mb-6">✨ What We Offer</h2>
 
           <ul className="grid md:grid-cols-2 gap-6 text-gray-700 text-lg relative z-10">
-
             {[
               "Extractive & Abstractive Summaries",
               "Bullet Point Extraction",
@@ -100,6 +99,53 @@ const About = () => {
                 <div className="text-5xl mb-4">{item.icon}</div>
                 <h3 className="text-2xl font-semibold mb-2">{item.title}</h3>
                 <p className="text-gray-600">{item.desc}</p>
+              </div>
+            ))}
+
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-300 my-12"></div>
+
+          {/* Developers Section */}
+          <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">
+            👨‍💻 Developers Behind This Project
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-10 relative z-10">
+
+            {[
+              {
+                name: "Gulrez Sarankar",
+                role: "Full-Stack Developer",
+                desc: "Worked on Frontend UI/UX, animations, and complete backend integration.",
+                img: "https://api.dicebear.com/9.x/adventurer/svg?seed=Gulrez"
+              },
+              {
+                name: "Mustafa Shaikh",
+                role: "Backend & AI Model Developer",
+                desc: "Developed Flask APIs, summarization pipeline, and AI integration.",
+                img: "https://api.dicebear.com/9.x/adventurer/svg?seed=Saran"
+              },
+              {
+                name: "Bilal Momin",
+                role: "Database & Security Engineer",
+                desc: "Designed MySQL structure and handled authentication & security.",
+                img: "https://api.dicebear.com/9.x/adventurer/svg?seed=Anzar"
+              },
+            ].map((dev, index) => (
+              <div
+                key={index}
+                className="bg-white/70 backdrop-blur-xl border border-gray-200 shadow-xl rounded-3xl p-8 text-center hover:scale-[1.05] transition-all"
+              >
+                <img
+                  src={dev.img}
+                  alt={dev.name}
+                  className="w-24 h-24 rounded-full mx-auto mb-4 shadow-lg"
+                />
+                <h3 className="text-2xl font-semibold text-gray-900">{dev.name}</h3>
+                <p className="text-indigo-600 font-medium mb-2">{dev.role}</p>
+                <p className="text-gray-600">{dev.desc}</p>
               </div>
             ))}
 
