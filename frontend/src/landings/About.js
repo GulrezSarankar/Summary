@@ -49,14 +49,14 @@ const About = () => {
           Designed for students, professionals, and teams who want speed and clarity.
         </p>
 
-        {/* Large Glass Card */}
+        {/* Glass Card */}
         <div className="mt-16 bg-white/40 backdrop-blur-2xl border border-gray-200 shadow-2xl rounded-3xl p-12 relative overflow-hidden">
 
-          {/* Glowing Decorative Balls */}
+          {/* Decorative Glows */}
           <div className="absolute -top-14 -left-14 w-56 h-56 bg-indigo-400 opacity-30 blur-[100px] rounded-full"></div>
           <div className="absolute bottom-0 right-0 w-56 h-56 bg-purple-400 opacity-30 blur-[100px] rounded-full"></div>
 
-          {/* Section: What We Offer */}
+          {/* What We Offer */}
           <h2 className="text-4xl font-bold text-gray-900 mb-6">✨ What We Offer</h2>
 
           <ul className="grid md:grid-cols-2 gap-6 text-gray-700 text-lg relative z-10">
@@ -86,7 +86,6 @@ const About = () => {
 
           {/* Feature Cards */}
           <div className="grid md:grid-cols-3 gap-10 relative z-10">
-
             {[
               { icon: "🤖", title: "AI Driven", desc: "Built with advanced NLP transformers." },
               { icon: "⚡", title: "Ultra Fast", desc: "Summaries in seconds — not minutes." },
@@ -101,19 +100,17 @@ const About = () => {
                 <p className="text-gray-600">{item.desc}</p>
               </div>
             ))}
-
           </div>
 
           {/* Divider */}
           <div className="border-t border-gray-300 my-12"></div>
 
-          {/* Developers Section */}
+          {/* Developers */}
           <h2 className="text-4xl font-bold text-gray-900 mb-10 text-center">
             👨‍💻 Developers Behind This Project
           </h2>
 
           <div className="grid md:grid-cols-3 gap-10 relative z-10">
-
             {[
               {
                 name: "Gulrez Sarankar",
@@ -125,7 +122,7 @@ const About = () => {
                 name: "Mustafa Shaikh",
                 role: "Backend & AI Model Developer",
                 desc: "Developed Flask APIs, summarization pipeline, and AI integration.",
-                img: "https://api.dicebear.com/9.x/adventurer/svg?seed=Saran"
+                img: "Mustafa.jpg"
               },
               {
                 name: "Bilal Momin",
@@ -141,14 +138,13 @@ const About = () => {
                 <img
                   src={dev.img}
                   alt={dev.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 shadow-lg"
+                  className="w-40 h-40 rounded-full mx-auto mb-4 shadow-xl border-4 border-white"
                 />
                 <h3 className="text-2xl font-semibold text-gray-900">{dev.name}</h3>
                 <p className="text-indigo-600 font-medium mb-2">{dev.role}</p>
                 <p className="text-gray-600">{dev.desc}</p>
               </div>
             ))}
-
           </div>
 
         </div>
