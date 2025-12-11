@@ -8,10 +8,8 @@ nltk==3.8.1
 numpy==1.26.4
 gunicorn==22.0.0
 
-# PyTorch CPU wheel (Render compatible)
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.2
+torch==2.5.1+cpu
 
-# Transformers & dependencies
 transformers==4.39.3
 sentencepiece==0.1.99
