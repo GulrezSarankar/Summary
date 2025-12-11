@@ -15,13 +15,23 @@ import pymysql
 from flask_mail import Mail, Message
 
 # -----------------------------
-# NLTK Downloads (Fixes punkt_tab ERROR)
+# NLTK Downloads
 # -----------------------------
 nltk.download('punkt', quiet=True)
 nltk.download('punkt_tab', quiet=True)
 
+# -----------------------------
+# Flask App
+# -----------------------------
 app = Flask(__name__)
 CORS(app)
+
+# -----------------------------
+# Root Route (Fix 404)
+# -----------------------------
+@app.route("/")
+def home():
+    return jsonify({"status": "Backend Live", "message": "Summary API Running Successfully"}), 200
 
 # -----------------------------
 # JWT Config
@@ -31,21 +41,21 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=2)
 jwt = JWTManager(app)
 
 # -----------------------------
-# EMAIL CONFIG (Admin Contact Emails)
+# EMAIL CONFIG
 # -----------------------------
 app.config['MAIL_SERVER'] = "smtp.gmail.com"
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 
-# 🔥 Put your admin email + Gmail App Password here
-app.config['MAIL_USERNAME'] = "youradminemail@gmail.com"
-app.config['MAIL_PASSWORD'] = "your_app_password"
-app.config['MAIL_DEFAULT_SENDER'] = "youradminemail@gmail.com"
+# ⚠️ Set on Render Dashboard (Environment Variables)
+app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME", "youradminemail@gmail.com")
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD", "your_app_password")
+app.config['MAIL_DEFAULT_SENDER'] = app.config["MAIL_USERNAME"]
 
 mail = Mail(app)
 
 # -----------------------------
-# Summarizer Model
+# Summarization Model
 # -----------------------------
 summarizer = pipeline("summarization", model="t5-small")
 
@@ -70,7 +80,7 @@ def get_db_connection():
 
 
 # -----------------------------
-# Register
+# Register User
 # -----------------------------
 @app.route('/register', methods=['POST'])
 def register_user():
@@ -79,10 +89,11 @@ def register_user():
     email = data.get('email')
     password = data.get('password')
 
-    if not username or not email or not password:
+    if not all([username, email, password]):
         return jsonify({"msg": "Missing fields"}), 400
 
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
     connection = get_db_connection()
     if not connection:
         return jsonify({"msg": "Database connection failed"}), 500
@@ -98,17 +109,20 @@ def register_user():
             (username, email, hashed_password.decode('utf-8'))
         )
         connection.commit()
+
         return jsonify({"msg": "Registered successfully!"}), 201
+
     except Exception as e:
         connection.rollback()
         return jsonify({"msg": "DB error", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
 
 
 # -----------------------------
-# Login
+# Login User
 # -----------------------------
 @app.route('/login', methods=['POST'])
 def login_user():
@@ -116,7 +130,7 @@ def login_user():
     email = data.get('email')
     password = data.get('password')
 
-    if not email or not password:
+    if not all([email, password]):
         return jsonify({"msg": "Missing fields"}), 400
 
     connection = get_db_connection()
@@ -133,14 +147,17 @@ def login_user():
             return jsonify({"msg": "User does not exist"}), 401
 
         stored_pass = user[1].encode('utf-8')
+
         if bcrypt.checkpw(password.encode('utf-8'), stored_pass):
             access_token = create_access_token(identity=user[0])
             return jsonify(access_token=access_token), 200
 
         return jsonify({"msg": "Invalid password"}), 401
+
     except Exception as e:
         traceback.print_exc()
         return jsonify({"msg": "Error", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
@@ -167,9 +184,12 @@ def get_next_meeting_id():
         )
         result = cursor.fetchone()
         max_id = result[0] if result[0] else 0
+
         return jsonify({"next_meeting_id": max_id + 1})
+
     except Exception as e:
         return jsonify({"msg": "Error", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
@@ -203,6 +223,7 @@ def get_summary():
     connection = get_db_connection()
     if not connection:
         return jsonify({"msg": "DB fail"}), 500
+
     cursor = connection.cursor()
 
     try:
@@ -254,13 +275,14 @@ def get_summary():
         connection.rollback()
         traceback.print_exc()
         return jsonify({"msg": "Error generating summary", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
 
 
 # -----------------------------
-# Fetch All Summaries
+# Fetch Summaries
 # -----------------------------
 @app.route('/get_summary_by_id', methods=['GET'])
 @jwt_required()
@@ -297,6 +319,7 @@ def get_summary_by_id():
 
     except Exception as e:
         return jsonify({"msg": "Error", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
@@ -328,25 +351,25 @@ def delete_summary(meeting_id):
     except Exception as e:
         connection.rollback()
         return jsonify({"msg": "Error", "error": str(e)}), 500
+
     finally:
         cursor.close()
         connection.close()
 
 
-# ------------------------------------------------------------------
-# ⭐ CONTACT API — Saves Message + Sends Email to Admin
-# ------------------------------------------------------------------
+# -----------------------------
+# Contact Form (Save + Email)
+# -----------------------------
 @app.route('/contact', methods=['POST'])
 def contact():
-    data = request.json
+    data = request.get_json()
     name = data.get("name")
     email = data.get("email")
     message = data.get("message")
 
-    if not name or not email or not message:
+    if not all([name, email, message]):
         return jsonify({"error": "All fields required"}), 400
 
-    # Save to DB
     connection = get_db_connection()
     cursor = connection.cursor()
 
@@ -388,7 +411,7 @@ Message:
 
 
 # -----------------------------
-# Run App
+# Run App (Local Development)
 # -----------------------------
 if __name__ == '__main__':
     app.run(debug=True)
