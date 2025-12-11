@@ -15,7 +15,7 @@ import {
   Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import axios from "axios";
+import api from "./api";
 
 function Dashboard() {
   const [summariesList, setSummariesList] = useState([]);
@@ -23,7 +23,7 @@ function Dashboard() {
 
   const fetchSummaries = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:5000/get_summary_by_id", {
+      const response = await api.get("/get_summary_by_id", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSummariesList(response.data.summaries || []);
@@ -41,7 +41,7 @@ function Dashboard() {
     if (!window.confirm("Delete this summary?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/delete_summary/${meetingId}`, {
+      await api.delete(`/delete_summary/${meetingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -62,7 +62,8 @@ function Dashboard() {
           minHeight: "100vh",
         }}
       >
-        {/* Header Card */}
+
+        {/* HEADER */}
         <Box
           sx={{
             background: "white",
@@ -73,49 +74,22 @@ function Dashboard() {
             border: "1px solid #e8e8e8",
           }}
         >
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            sx={{
-              textAlign: { xs: "center", md: "left" },
-              color: "#2a2a2a",
-              letterSpacing: "-0.5px",
-            }}
-          >
+          <Typography variant="h4" fontWeight={800}>
             📄 Your Generated Summaries
           </Typography>
-          <Typography sx={{ mt: 1, color: "#666", fontSize: "15px" }}>
-            All your generated summaries appear here. You can view, scroll, and delete them anytime.
+          <Typography sx={{ mt: 1, color: "#666" }}>
+            All your generated summaries appear here.
           </Typography>
         </Box>
 
-        {/* Desktop View */}
+        {/* DESKTOP TABLE */}
         <Box sx={{ display: { xs: "none", md: "block" } }}>
-          <TableContainer
-            component={Paper}
-            sx={{
-              borderRadius: 4,
-              overflow: "hidden",
-              boxShadow: "0 6px 25px rgba(0,0,0,0.08)",
-            }}
-          >
+          <TableContainer component={Paper} sx={{ borderRadius: 4 }}>
             <Table>
               <TableHead>
-                <TableRow
-                  sx={{
-                    background: "linear-gradient(90deg, #79a7ff, #89d4ff)",
-                  }}
-                >
+                <TableRow sx={{ background: "linear-gradient(90deg, #79a7ff, #89d4ff)" }}>
                   {["Meeting ID", "Paragraph", "Summary", "Bullet Points", "Actions"].map((col) => (
-                    <TableCell
-                      key={col}
-                      sx={{
-                        fontWeight: 700,
-                        color: "white",
-                        fontSize: "15px",
-                        letterSpacing: "0.3px",
-                      }}
-                    >
+                    <TableCell key={col} sx={{ color: "white", fontWeight: 700 }}>
                       {col}
                     </TableCell>
                   ))}
@@ -125,111 +99,53 @@ function Dashboard() {
               <TableBody>
                 {summariesList.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 5, color: "#777" }}>
+                    <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
                       No summaries found
                     </TableCell>
                   </TableRow>
                 )}
 
-                {summariesList.map((row, index) => (
-                  <TableRow
-                    key={row.meeting_id}
-                    sx={{
-                      backgroundColor: index % 2 === 0 ? "#f9fbff" : "#ffffff",
-                      "&:hover": {
-                        backgroundColor: "#eef4ff",
-                        transition: "0.2s",
-                      },
-                    }}
-                  >
-                    <TableCell sx={{ fontWeight: 600 }}>{row.meeting_id}</TableCell>
-                    <TableCell sx={{ maxWidth: 250 }}>{row.ptext}</TableCell>
-                    <TableCell sx={{ maxWidth: 250 }}>{row.summary}</TableCell>
+                {summariesList.map((row) => (
+                  <TableRow key={row.meeting_id}>
+                    <TableCell>{row.meeting_id}</TableCell>
+                    <TableCell>{row.ptext}</TableCell>
+                    <TableCell>{row.summary}</TableCell>
+                    <TableCell sx={{ whiteSpace: "pre-wrap" }}>{row.bullet_points}</TableCell>
                     <TableCell>
-                      <pre style={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}>
-                        {row.bullet_points}
-                      </pre>
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        color="error"
-                        onClick={() => handleDelete(row.meeting_id)}
-                        sx={{
-                          background: "#ffe5e5",
-                          "&:hover": { background: "#ffcccc" },
-                        }}
-                      >
+                      <IconButton color="error" onClick={() => handleDelete(row.meeting_id)}>
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
+
             </Table>
           </TableContainer>
         </Box>
 
-        {/* Mobile Cards (BEAUTIFUL MOBILE UI) */}
+        {/* MOBILE CARDS */}
         <Box sx={{ display: { xs: "block", md: "none" } }}>
           {summariesList.map((row) => (
-            <Card
-              key={row.meeting_id}
-              sx={{
-                mb: 3,
-                borderRadius: 4,
-                padding: 3,
-                boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-                backgroundColor: "white",
-                border: "1px solid #ededed",
-                transition: "0.2s",
-                "&:hover": {
-                  transform: "scale(1.02)",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-                },
-              }}
-            >
-              <Typography variant="h6" fontWeight={800} color="#333">
-                Meeting ID: {row.meeting_id}
-              </Typography>
-
-              <Typography mt={2} fontWeight={600} color="#555">
-                Paragraph
-              </Typography>
-              <Typography color="#444">{row.ptext}</Typography>
-
-              <Typography mt={2} fontWeight={600} color="#555">
-                Summary
-              </Typography>
-              <Typography color="#444">{row.summary}</Typography>
-
-              {row.bullet_points && (
-                <>
-                  <Typography mt={2} fontWeight={600} color="#555">
-                    Bullets
-                  </Typography>
-                  <Typography sx={{ whiteSpace: "pre-wrap" }} color="#444">
-                    {row.bullet_points}
-                  </Typography>
-                </>
-              )}
+            <Card key={row.meeting_id} sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6">Meeting ID: {row.meeting_id}</Typography>
+              <Typography mt={2}><b>Paragraph:</b> {row.ptext}</Typography>
+              <Typography mt={2}><b>Summary:</b> {row.summary}</Typography>
+              <Typography mt={2}><b>Bullets:</b> {row.bullet_points}</Typography>
 
               <Button
-                variant="contained"
                 fullWidth
+                sx={{ mt: 2 }}
+                variant="outlined"
                 color="error"
-                sx={{
-                  mt: 3,
-                  py: 1.2,
-                  fontWeight: 700,
-                  borderRadius: 3,
-                }}
                 onClick={() => handleDelete(row.meeting_id)}
               >
-                Delete Summary
+                Delete
               </Button>
             </Card>
           ))}
         </Box>
+
       </Box>
     </Layout>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Auth Pages
 import Login from './Login';
@@ -19,21 +19,30 @@ import DownloadSummary from './DownloadSummary';
 import ProtectedRoute from './ProtectedRoute';
 
 function App() {
+  const token = localStorage.getItem("token");
+
   return (
     <Router>
       <Routes>
 
-        {/* Public Pages */}
+        {/* ===== PUBLIC PAGES ===== */}
         <Route path="/" element={<LandingHome />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/features" element={<Features />} />
 
-        {/* Auth Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* ===== AUTH PAGES ===== */}
+        <Route
+          path="/login"
+          element={token ? <Navigate to="/home" replace /> : <Login />}
+        />
 
-        {/* Protected Pages */}
+        <Route
+          path="/register"
+          element={token ? <Navigate to="/home" replace /> : <Register />}
+        />
+
+        {/* ===== PROTECTED ROUTES ===== */}
         <Route
           path="/home"
           element={
@@ -60,6 +69,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ===== 404 PAGE (Fallback) ===== */}
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </Router>

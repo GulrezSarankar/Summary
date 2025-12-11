@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Grid, Card, CardContent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from './api';   // <-- IMPORTANT: use API instead of axios
 
 function Register() {
     const [username, setUsername] = useState('');
@@ -13,15 +13,17 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/register', {
+            await api.post('/register', {
                 username,
                 email,
                 password,
             });
+
             alert('Registration successful!');
             navigate('/login');
+
         } catch (err) {
-            setError('Error during registration. Please try again.');
+            setError(err.response?.data?.msg || 'Error during registration. Please try again.');
         }
     };
 
@@ -51,7 +53,6 @@ function Register() {
                 }}
             ></div>
 
-            {/* Registration Card */}
             <Card 
                 sx={{ 
                     padding: 4, 

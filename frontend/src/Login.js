@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "./api";   // <-- IMPORTANT: use api instead of axios
 
 export default function Auth({ isRegister }) {
   const navigate = useNavigate();
@@ -12,12 +12,12 @@ export default function Auth({ isRegister }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isRegister ? "register" : "login";
+      const endpoint = isRegister ? "/register" : "/login";
       const payload = isRegister
         ? { username, email, password }
         : { email, password };
 
-      const res = await axios.post(`http://localhost:5000/${endpoint}`, payload);
+      const res = await api.post(endpoint, payload);
 
       if (!isRegister) {
         localStorage.setItem("token", res.data.access_token);
@@ -26,15 +26,16 @@ export default function Auth({ isRegister }) {
         alert("Registration Successful!");
         navigate("/login");
       }
-    } catch {
-      setError("Something went wrong. Try again.");
+    } catch (err) {
+      console.log(err);
+      setError(err.response?.data?.msg || "Something went wrong. Try again.");
     }
   };
 
   return (
     <div className="relative flex items-center justify-center w-full h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
 
-      {/* Soft floating background shapes */}
+      {/* Background shapes */}
       <div className="absolute w-72 h-72 bg-white/50 backdrop-blur-xl rounded-full top-10 left-10 blur-2xl opacity-60 animate-pulse"></div>
       <div className="absolute w-80 h-80 bg-white/40 backdrop-blur-xl rounded-full bottom-10 right-10 blur-2xl opacity-60 animate-pulse"></div>
 
@@ -92,7 +93,6 @@ export default function Auth({ isRegister }) {
           </button>
         </form>
 
-        {/* Switch Page */}
         <button
           onClick={() => navigate(isRegister ? "/login" : "/register")}
           className="w-full mt-4 text-blue-600 font-medium hover:underline"
@@ -102,7 +102,6 @@ export default function Auth({ isRegister }) {
             : "Don't have an account? Sign Up"}
         </button>
 
-        {/* Home Button */}
         <button
           onClick={() => navigate("/")}
           className="w-full mt-2 py-2 text-gray-700 font-medium border border-gray-300 rounded-xl hover:bg-gray-100 transition"
@@ -111,7 +110,6 @@ export default function Auth({ isRegister }) {
         </button>
       </div>
 
-      {/* Animations */}
       <style>{`
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
