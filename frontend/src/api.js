@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://summary-generator-majd.onrender.com",
+  
 });
 
 api.interceptors.request.use((config) => {
