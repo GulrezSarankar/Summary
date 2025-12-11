@@ -119,7 +119,7 @@ const About = () => {
                 name: "Gulrez Sarankar",
                 role: "Full-Stack Developer",
                 desc: "Worked on Frontend UI/UX, animations, and complete backend integration.",
-                img: "/public/Gulrez"
+                img: "/Gulrez.png"
               },
               {
                 name: "Mustafa Shaikh",
