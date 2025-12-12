@@ -77,18 +77,20 @@ def summarizer_api(text):
 def get_db_connection():
     try:
         connection = pymysql.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            user=os.environ.get('DB_USER', 'root'),
-            password=os.environ.get('DB_PASSWORD', 'system'),
-            database=os.environ.get('DB_NAME', 'demo111'),
+            host=os.environ.get('MYSQLHOST'),
+            user=os.environ.get('MYSQLUSER'),
+            password=os.environ.get('MYSQLPASSWORD'),
+            database=os.environ.get('MYSQLDATABASE'),
+            port=int(os.environ.get('MYSQLPORT', 3306)),
             charset='utf8mb4',
             cursorclass=pymysql.cursors.Cursor,
             autocommit=False
         )
         return connection
-    except pymysql.MySQLError as e:
-        print("Database Connection Failed:", str(e))
+    except Exception as e:
+        print("Database Connection Failed:", e)
         return None
+
 
 
 # Register User
