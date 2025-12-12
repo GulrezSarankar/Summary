@@ -10,9 +10,9 @@ from flask_jwt_extended import (
     JWTManager, create_access_token, get_jwt_identity, jwt_required
 )
 from nltk.tokenize import sent_tokenize
-from transformers import pipeline
 import pymysql
 from flask_mail import Mail, Message
+import requests
 
 # -----------------------------
 # NLTK Downloads
@@ -27,7 +27,7 @@ app = Flask(__name__)
 CORS(app)
 
 # -----------------------------
-# Root Route (Fix 404)
+# Root Route
 # -----------------------------
 @app.route("/")
 def home():
@@ -47,21 +47,33 @@ app.config['MAIL_SERVER'] = "smtp.gmail.com"
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 
-# ⚠️ Set on Render Dashboard (Environment Variables)
 app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME", "youradminemail@gmail.com")
 app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD", "your_app_password")
 app.config['MAIL_DEFAULT_SENDER'] = app.config["MAIL_USERNAME"]
 
 mail = Mail(app)
 
-# -----------------------------
-# Summarization Model
-# -----------------------------
-summarizer = pipeline("summarization", model="t5-small")
+# HuggingFace API Summarizer
+HF_API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-small"
+HF_HEADERS = {"Authorization": f"Bearer {os.environ.get('HF_TOKEN', '')}"}
 
-# -----------------------------
+def summarizer_api(text):
+    payload = {"inputs": text}
+    try:
+        response = requests.post(HF_API_URL, headers=HF_HEADERS, json=payload, timeout=20)
+        output = response.json()
+
+        # Handle HF API output
+        if isinstance(output, list) and "generated_text" in output[0]:
+            return output[0]["generated_text"]
+        elif isinstance(output, dict) and "error" in output:
+            return "Model error: " + output["error"]
+        return "Error: Could not generate summary"
+
+    except Exception as e:
+        return f"Summary failed: {str(e)}"
+
 # Database Connection
-# -----------------------------
 def get_db_connection():
     try:
         connection = pymysql.connect(
@@ -79,9 +91,7 @@ def get_db_connection():
         return None
 
 
-# -----------------------------
 # Register User
-# -----------------------------
 @app.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
@@ -121,9 +131,7 @@ def register_user():
         connection.close()
 
 
-# -----------------------------
 # Login User
-# -----------------------------
 @app.route('/login', methods=['POST'])
 def login_user():
     data = request.get_json()
@@ -163,9 +171,7 @@ def login_user():
         connection.close()
 
 
-# -----------------------------
 # Get Next Meeting ID
-# -----------------------------
 @app.route('/get_next_meeting_id', methods=['GET'])
 @jwt_required()
 def get_next_meeting_id():
@@ -195,17 +201,13 @@ def get_next_meeting_id():
         connection.close()
 
 
-# -----------------------------
 # Extractive Summary
-# -----------------------------
 def extractive_summary(text, num_sentences=3):
     sentences = sent_tokenize(text)
     return ' '.join(sentences[:num_sentences])
 
 
-# -----------------------------
 # Generate Summary
-# -----------------------------
 @app.route('/get_summary', methods=['POST'])
 @jwt_required()
 def get_summary():
@@ -234,8 +236,8 @@ def get_summary():
             if summary_type == 'extractive':
                 summaries.append(extractive_summary(chunk))
             else:
-                result = summarizer(chunk, max_length=130, min_length=25, do_sample=False)
-                summaries.append(result[0]['summary_text'])
+                result_text = summarizer_api(chunk)
+                summaries.append(result_text)
 
         final_summary = " ".join(summaries)
 
@@ -281,9 +283,7 @@ def get_summary():
         connection.close()
 
 
-# -----------------------------
 # Fetch Summaries
-# -----------------------------
 @app.route('/get_summary_by_id', methods=['GET'])
 @jwt_required()
 def get_summary_by_id():
@@ -325,9 +325,7 @@ def get_summary_by_id():
         connection.close()
 
 
-# -----------------------------
-# Delete Summary
-# -----------------------------
+
 @app.route('/delete_summary/<int:meeting_id>', methods=['DELETE'])
 @jwt_required()
 def delete_summary(meeting_id):
@@ -357,9 +355,6 @@ def delete_summary(meeting_id):
         connection.close()
 
 
-# -----------------------------
-# Contact Form (Save + Email)
-# -----------------------------
 @app.route('/contact', methods=['POST'])
 def contact():
     data = request.get_json()
@@ -380,7 +375,6 @@ def contact():
         )
         connection.commit()
 
-        # Send Email to Admin
         try:
             msg = Message(
                 subject=f"New Contact Message from {name}",
@@ -410,8 +404,8 @@ Message:
         connection.close()
 
 
-# -----------------------------
-# Run App (Local Development)
-# -----------------------------
+
+# Run App
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=8000)
