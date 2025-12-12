@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://summary-generator-majd.onrender.com",
+  baseURL: "summary-production-303a.up.railway.app",
   
 });
 
